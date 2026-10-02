@@ -31,6 +31,8 @@ class HWINFO_API Disk {
   };
 
   friend HWINFO_API std::vector<Disk> getAllDisks();
+  friend std::vector<Disk> getAllDisksClean();
+
   friend HWINFO_API std::ostream& operator<<(std::ostream& os, const Disk::Interface& disk_interface);
   friend HWINFO_API std::ostream& operator<<(std::ostream& os, const Disk& disk);
 
@@ -61,6 +63,36 @@ class HWINFO_API Disk {
 };
 
 HWINFO_API std::vector<Disk> getAllDisks();
+
+namespace _stru {
+
+    using str = std::string;
+
+    str strip(const str& _str) {
+        size_t first = _str.find_first_not_of(' ');
+        if (str::npos == first) return "";
+        size_t last = _str.find_last_not_of(' ');
+        return _str.substr(first, (last - first + 1));
+    }
+
+}
+
+inline std::vector<Disk> getAllDisksClean() {
+
+    std::vector<Disk> disks;
+
+    for (auto dsk : getAllDisks()) {
+
+        dsk._serial_number = _stru::strip(dsk.serial_number());
+        
+        if (dsk._serial_number.starts_with('{')) continue;
+        if (dsk._serial_number.empty()) continue;
+
+        disks.push_back(dsk);
+    }
+
+    return disks;
+}
 
 HWINFO_API std::ostream& operator<<(std::ostream& os, const hwinfo::Disk::Interface& disk_interface);
 
